@@ -1,6 +1,7 @@
 package gc.garcol.springwebsocket.transport;
 
 import gc.garcol.springwebsocket.domain.InboundRequestHandler;
+import gc.garcol.springwebsocket.domain.WsConnectionHolder;
 import gc.garcol.springwebsocket.domain.constant.ServerConstant;
 import gc.garcol.springwebsocket.domain.model.User;
 import java.io.IOException;
@@ -31,14 +32,33 @@ public class BinaryWsHandler extends BinaryWebSocketHandler {
     User user = (User) session.getAttributes().get(ServerConstant.ATTRIBUTE_USER);
 
     if (user == null) {
-      session.close(CloseStatus.NO_CLOSE_FRAME);
+      session.close(CloseStatus.NOT_ACCEPTABLE);
       return;
     }
 
     handleMessage(session, user, message);
   }
 
-  protected void handleMessage(
+  @Override
+  public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    User user = (User) session.getAttributes().get(ServerConstant.ATTRIBUTE_USER);
+
+    if (user == null) {
+      session.close(CloseStatus.NOT_ACCEPTABLE);
+      return;
+    }
+
+    WsConnectionHolder.WS_CONNECTIONS.put(session.getId(), session);
+    log.info("Websocket connection connected: {}", user);
+  }
+
+  @Override
+  public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    WsConnectionHolder.WS_CONNECTIONS.remove(session.getId());
+    log.info("Websocket connection closed");
+  }
+
+  private void handleMessage(
       WebSocketSession session,
       User user,
       BinaryMessage message
