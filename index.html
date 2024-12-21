@@ -7,38 +7,48 @@
   <h1>Real-Time</h1>
   <input id="messageInput" type="text" placeholder="Type your message" />
   <button onclick="sendMessage()">Send</button>
+  <button onclick="createConnection()">Reconnect</button>
   <hr/>
   <div id="messages"></div>
 <script>
-  const socket = new WebSocket('ws://localhost:8080/ws?token=1:cafe');
-  socket.binaryType = 'arraybuffer';
+  let socket = null;
+  createConnection();
+
+  function createConnection() {
+    if (socket) {
+      socket.close();
+    }
+
+    socket = new WebSocket('ws://localhost:8080/ws?token=1:cafe');
+    socket.binaryType = 'arraybuffer';
+
+    socket.onopen = () => {
+      console.log('WebSocket connection established.');
+      div.innerHTML += `<p>CONNECTED</p>`;
+    };
+
+    socket.onmessage = (event) => {
+      if (event.data instanceof ArrayBuffer) {
+        const receivedData = new Uint8Array(event.data);
+        const text = new TextDecoder().decode(receivedData);
+        console.log("Binary data as Uint8Array:", receivedData);
+        div.innerHTML += `<p>${text}</p>`;
+      }
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed.');
+      div.innerHTML += `<p>CLOSED</p>`;
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      div.innerHTML += `<p>ON ERROR: ${error}</p>`;
+    };
+  }
 
   const div = document.getElementById("messages");
   const messageInput = document.getElementById("messageInput");
-
-  socket.onopen = () => {
-    console.log('WebSocket connection established.');
-    div.innerHTML += `<p>CONNECTED</p>`;
-  };
-
-  socket.onmessage = (event) => {
-    if (event.data instanceof ArrayBuffer) {
-      const receivedData = new Uint8Array(event.data);
-      const text = new TextDecoder().decode(receivedData);
-      console.log("Binary data as Uint8Array:", receivedData);
-      div.innerHTML += `<p>${text}</p>`;
-    }
-  };
-
-  socket.onclose = () => {
-    console.log('WebSocket connection closed.');
-    div.innerHTML += `<p>CLOSED</p>`;
-  };
-
-  socket.onerror = (error) => {
-    console.error('WebSocket error:', error);
-    div.innerHTML += `<p>ON ERROR: ${error}</p>`;
-  };
 
   function sendMessage() {
     const message = messageInput.value;
