@@ -6,11 +6,15 @@
 <body>
   <h1>Real-Time</h1>
   <input id="messageInput" type="text" placeholder="Type your message" />
+  <input value="1" id="totalInput" type="text" placeholder="Type your message" />
   <button onclick="sendMessage()">Send</button>
   <button onclick="createConnection()">Reconnect</button>
   <hr/>
   <div id="messages"></div>
 <script>
+  const div = document.getElementById("messages");
+  const messageInput = document.getElementById("messageInput");
+
   let socket = null;
   createConnection();
 
@@ -18,6 +22,7 @@
     if (socket) {
       socket.close();
     }
+    div.innerHTML = '';
 
     socket = new WebSocket('ws://localhost:8080/ws?token=1:cafe');
     socket.binaryType = 'arraybuffer';
@@ -31,7 +36,6 @@
       if (event.data instanceof ArrayBuffer) {
         const receivedData = new Uint8Array(event.data);
         const text = new TextDecoder().decode(receivedData);
-        console.log("Binary data as Uint8Array:", receivedData);
         div.innerHTML += `<p>${text}</p>`;
       }
     };
@@ -47,14 +51,17 @@
     };
   }
 
-  const div = document.getElementById("messages");
-  const messageInput = document.getElementById("messageInput");
-
   function sendMessage() {
     const message = messageInput.value;
     const binaryData = new TextEncoder().encode(message);
-    socket.send(binaryData.buffer);
-    messageInput.value = '';
+    const total = document.getElementById("totalInput").value;
+    for (let i = 0; i < total; i++) {
+      if (i % 100 === 0) {
+        div.innerHTML = '';
+      }
+      socket.send(binaryData);
+    }
+<!--    messageInput.value = '';-->
   }
 </script>
 </body>

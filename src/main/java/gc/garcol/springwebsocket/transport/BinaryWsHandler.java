@@ -4,7 +4,9 @@ import gc.garcol.springwebsocket.domain.InboundRequestHandler;
 import gc.garcol.springwebsocket.domain.WsConnectionHolder;
 import gc.garcol.springwebsocket.domain.constant.ServerConstant;
 import gc.garcol.springwebsocket.domain.model.User;
+import io.micrometer.core.instrument.Timer;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,13 +24,14 @@ import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 @RequiredArgsConstructor
 public class BinaryWsHandler extends BinaryWebSocketHandler {
 
-  protected final InboundRequestHandler inboundRequestHandler;
+  private final InboundRequestHandler inboundRequestHandler;
+  private final Timer wsTimer;
 
   @Override
   protected void handleBinaryMessage(
       WebSocketSession session, BinaryMessage message
   ) throws Exception {
-
+    long startTime = System.nanoTime();
     User user = (User) session.getAttributes().get(ServerConstant.ATTRIBUTE_USER);
 
     if (user == null) {
@@ -37,6 +40,7 @@ public class BinaryWsHandler extends BinaryWebSocketHandler {
     }
 
     handleMessage(session, user, message);
+    wsTimer.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
   }
 
   @Override
@@ -63,12 +67,9 @@ public class BinaryWsHandler extends BinaryWebSocketHandler {
       User user,
       BinaryMessage message
   ) throws IOException {
-
-    log.info("Received message from user: {}", user);
-    String response = String.format("[%s]: %s",
-        user.toString(),
-        new String(message.getPayload().array())
-    );
+    var payload = new String(message.getPayload().array());
+    log.info("Received message: {}", payload);
+    String response = String.format("[%s]: %s", user.toString(), payload);
     session.sendMessage(new BinaryMessage(response.getBytes()));
   }
 }
