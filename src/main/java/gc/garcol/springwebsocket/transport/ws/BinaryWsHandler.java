@@ -1,4 +1,4 @@
-package gc.garcol.springwebsocket.transport;
+package gc.garcol.springwebsocket.transport.ws;
 
 import gc.garcol.springwebsocket.domain.InboundRequestHandler;
 import gc.garcol.springwebsocket.domain.WsConnectionHolder;

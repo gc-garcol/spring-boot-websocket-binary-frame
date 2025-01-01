@@ -15,4 +15,8 @@ public class UserService {
     return new User().id(Long.parseLong(data[0])).name(data[1]);
   }
 
+  public String generateToken(User user) {
+    return user.id() + ":" + user.name();
+  }
+
 }

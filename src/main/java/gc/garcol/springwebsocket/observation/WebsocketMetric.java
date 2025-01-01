@@ -1,4 +1,4 @@
-package gc.garcol.springwebsocket.metric;
+package gc.garcol.springwebsocket.observation;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;

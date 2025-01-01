@@ -1,7 +1,9 @@
-package gc.garcol.springwebsocket.transport;
+package gc.garcol.springwebsocket.transport.ws;
 
 import gc.garcol.springwebsocket.domain.UserService;
 import gc.garcol.springwebsocket.domain.constant.ServerConstant;
+import jakarta.servlet.http.Cookie;
+import java.util.Arrays;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +34,11 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
   ) throws Exception {
     try {
       ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-      String token = servletRequest
-          .getServletRequest()
-          .getQueryString()
-          .split(ServerConstant.WS_HANDSHAKE_TOKEN + "=")[1];
+      String token = Arrays.stream(servletRequest.getServletRequest().getCookies())
+          .filter(cookie -> cookie.getName().equals("token"))
+          .findFirst()
+          .map(Cookie::getValue)
+          .orElse(null);
 
       if (token == null) {
         return false;

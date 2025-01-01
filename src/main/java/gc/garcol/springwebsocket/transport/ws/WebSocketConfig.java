@@ -1,4 +1,4 @@
-package gc.garcol.springwebsocket.transport;
+package gc.garcol.springwebsocket.transport.ws;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
