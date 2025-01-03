@@ -1,5 +1,7 @@
 package gc.garcol.springwebsocket.transport.rest;
 
+import static gc.garcol.springwebsocket.domain.constant.ServerConstant.WS_HANDSHAKE_TOKEN;
+
 import gc.garcol.springwebsocket.domain.UserService;
 import gc.garcol.springwebsocket.domain.model.User;
 import jakarta.servlet.http.Cookie;
@@ -27,7 +29,7 @@ public class AuthController {
       @RequestBody Login login,
       HttpServletResponse response
   ) {
-    Cookie cookie = new Cookie("token",
+    Cookie cookie = new Cookie(WS_HANDSHAKE_TOKEN,
         userService.generateToken(new User().id(1L).name(login.username()))
     );
     cookie.setMaxAge(60 * 60);
@@ -40,7 +42,7 @@ public class AuthController {
 
   @PostMapping("/logout")
   public ResponseEntity<?> logout(HttpServletResponse response) {
-    Cookie cookie = new Cookie("token", null);
+    Cookie cookie = new Cookie(WS_HANDSHAKE_TOKEN, null);
     cookie.setMaxAge(0);
     cookie.setPath("/");
     cookie.setHttpOnly(true);

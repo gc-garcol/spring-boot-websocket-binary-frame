@@ -1,6 +1,13 @@
 version: '3'
 
 services:
+  redis:
+    container_name: rediss
+    image: redis/redis-stack
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    restart: on-failure
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.82.0
     container_name: otel-collector
@@ -23,7 +30,7 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
-      - 9090:9090
+      - "9090:9090"
     restart: unless-stopped
     volumes:
       - ./infra/prometheus:/etc/prometheus
@@ -36,7 +43,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - 3000:3000
+      - "3000:3000"
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin

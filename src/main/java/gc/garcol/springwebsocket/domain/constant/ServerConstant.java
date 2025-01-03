@@ -13,4 +13,6 @@ public class ServerConstant {
 
   public static final String ATTRIBUTE_USER = "user";
 
+  public static final String WS_TOPIC_BROADCAST = "ws:topic:broadcast";
+
 }

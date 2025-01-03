@@ -26,6 +26,7 @@ public class BinaryWsHandler extends BinaryWebSocketHandler {
 
   private final InboundRequestHandler inboundRequestHandler;
   private final Timer wsTimer;
+  private final BroadcastPublisher broadcastPublisher;
 
   @Override
   protected void handleBinaryMessage(
@@ -69,7 +70,6 @@ public class BinaryWsHandler extends BinaryWebSocketHandler {
   ) throws IOException {
     var payload = new String(message.getPayload().array());
     log.info("Received message: {}", payload);
-    String response = String.format("[%s]: %s", user.toString(), payload);
-    session.sendMessage(new BinaryMessage(response.getBytes()));
+    broadcastPublisher.publish(String.format("BROADCAST - [%s]: %s", user, payload).getBytes());
   }
 }
